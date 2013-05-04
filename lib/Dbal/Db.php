@@ -68,6 +68,8 @@ class Db {
         is_array($bind) or $bind = array($bind);
 
         $stmt = $this->getConnection()->prepare($sql);
+        
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
 
         $start = microtime(true);
         
