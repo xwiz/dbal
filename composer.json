@@ -1,0 +1,17 @@
+{
+    "name": "joegreen0991/dbal",
+    "description": "Database Abstraction Layer for laravel four",
+    "keywords": ["database", "abstraction layer", "dbal"],
+    "license": "MIT",
+    "authors": [
+        {"name": "Joe Green", "email": "joe.green0991@gmail.com"}
+    ],
+    "autoload": {
+        "psr-o": {
+            "Dbal": "lib"
+        }
+    },
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
