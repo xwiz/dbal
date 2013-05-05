@@ -260,6 +260,9 @@ class Select {
      * @return Select
      */
     public function order($order) {
+        
+        if(!$order) return $this;
+        
         if (is_string($order)) {
             if (strpos($order, ',') !== false) {
                 $order = preg_split('#,\s+#', $order);
