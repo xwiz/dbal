@@ -98,7 +98,7 @@ class Db {
         } else {
             if (!array_key_exists($table, $this->_tableCache)) {
                 $cols = array();
-                foreach ($this->fetchAll('SHOW COLUMNS FROM ' . $table) as $col) {
+                foreach ($this->query('SHOW COLUMNS FROM ' . $table) as $col) {
                     isset($col['field']) and $cols[] = $col['field'];
                 }
                 $this->_tableCache[$table] = $cols;
