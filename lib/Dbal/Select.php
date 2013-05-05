@@ -1,4 +1,4 @@
-<?php namespace  Jg\Dbal;
+<?php namespace  Dbal;
 
 class Select {
 
@@ -82,9 +82,10 @@ class Select {
      * @param  null|string $table
      * @return void
      */
-    public function __construct($table = null, array $columns = null) {
+    public function __construct($table = null, array $columns = null, $runner = null) {
         $table and $this->from($table);
         $columns and $this->columns($columns);
+        $this->_runner = $runner;
     }
 
     /**
@@ -185,8 +186,7 @@ class Select {
     }
     
     public function orWhere($where,$bind = array()){
-        !is_array($where) and $where = array($where,$bind);
-        $this->_where[] = array('OR',$where);
+        $this->_where[] = array('OR',array($where,$bind));
         return $this;
     }
 
@@ -197,8 +197,7 @@ class Select {
      * @return Select
      */
     public function where($where,$bind = array()) {
-        !is_array($where) and $where = array($where,$bind);
-        $this->_where[] = array('AND',$where);
+        $this->_where[] = array('AND',array($where,$bind));
         return $this;
     }
 
@@ -217,13 +216,13 @@ class Select {
      * @param  string|array $having
      * @return Select
      */
-    public function having($having) {
-        $this->_having[] = array('AND',$having);
+    public function having($having,$bind = array()) {
+        $this->_having[] = array('AND',array($having,$bind));
         return $this;
     }
     
     public function orHaving($having) {
-        $this->_having[] = array('OR',$having);
+        $this->_having[] = array('OR',array($having,$bind));
         return $this;
     }
     

@@ -1,4 +1,4 @@
-<?php namespace Jg\Dbal;
+<?php namespace Dbal;
 class Expr {
     
     public $expr;

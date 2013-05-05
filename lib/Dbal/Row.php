@@ -1,6 +1,6 @@
 <?php
 
-namespace Jg\Dbal;
+namespace Dbal;
 
 class RowExecption extends \Exception {
     

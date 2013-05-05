@@ -49,7 +49,7 @@ class Db {
      * @return \Jg\Db\Select 
      */
     public function queryBuilder($table = null, array $columns = null) {
-        return Select::make($table, $columns)->setRunner($this);
+        return new Select($table, $columns,$this);
     }
 
     /**
@@ -131,7 +131,17 @@ class Db {
      * @param string $quotedString The quoted string
      */
     public function quote($string) {
-        return $this->getConnection()->quote($string);
+        
+        $connection = $this->getConnection();
+        
+        if(is_array($string)){
+            foreach($string as $k => $value){
+                $string[$k] = $connection->quote($value);
+            }
+            return $string;
+        }
+
+        return $connection->quote($string);
     }
 
     /**
@@ -282,7 +292,7 @@ class Db {
     public function delete($table, $where = 0, $bind = array()) {
         return $this->query('DELETE FROM ' . $table . ' WHERE ' . $where, $bind);
     }
-
+    
     /**
      * Get the "auto increment id" of the last inserted row.
      * 
