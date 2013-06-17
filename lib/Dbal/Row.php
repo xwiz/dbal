@@ -25,8 +25,7 @@ abstract class Row extends \ArrayObject {
         $this->_db = $db;
         
         if(!is_null($data)){
-            $this->replace($data)->save();
-            $this->load();
+            $this->replace($data);
         }
 
     }
@@ -41,7 +40,7 @@ abstract class Row extends \ArrayObject {
     public function replace(array $data){
         
         foreach($data as $key => $value){
-            $this->idColumnName !== $key and $this->offsetSet($key, $value);
+            $this->offsetSet($key, $value);
         }
 
         return $this;
@@ -145,15 +144,6 @@ abstract class Row extends \ArrayObject {
         }
         
         return $this->getId();
-    }
-    
-    /**
-     * 
-     * @param array $data
-     * @return type
-     */
-    public function exchangeArray($data) {
-        return $this->replace($data);
     }
     
     /**
