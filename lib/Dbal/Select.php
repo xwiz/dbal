@@ -391,7 +391,7 @@ class Select {
         $groups = array();
 
         foreach ($this->_group as $column) {
-            $groups[] = $column instanceof Expression ? $column : $this->quoteIdentifierInFragment($column);
+            $groups[] = $column instanceof Expr ? $column : $this->quoteIdentifierInFragment($column);
         }
 
         return 'GROUP BY ' . implode(',', $groups) . "\n";
