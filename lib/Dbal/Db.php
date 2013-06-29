@@ -215,7 +215,10 @@ class Db {
         $qs = '';
         foreach ($data as $col => $v) {
             $cols .= $col . ',';
-            $qs .= '?,';
+            $qs .= ($v instanceof Expr ? (string)$v : '?') . ',';
+            if($v instanceof Expr){
+                unset($data[$col]);
+            }
         }
 
         $sql = 'INSERT INTO ' . $table . ' (' . trim($cols, ',') . ') VALUES (' . trim($qs, ',') . ')';
@@ -241,8 +244,12 @@ class Db {
 
         $str = '';
         foreach ($data as $col => $v) {
-            $val = '?';
+            $val = $v instanceof Expr ? (string)$v : '?';
             $str .= $col . '=' . $val . ',';
+            
+            if($v instanceof Expr){
+                unset($data[$col]);
+            }
         }
 
         $sql = 'UPDATE ' . $table . ' SET ' . trim($str, ',') . ' WHERE ' . $where;
@@ -270,8 +277,12 @@ class Db {
         $update = $vals = $cols = array();
         foreach ($data as $col => $v) {
             $cols[] = $col;
-            $vals[] = '?';
-            $update[] = $col . ' = ?';
+            $vals[] = $v instanceof Expr ? (string)$v : '?';
+            $update[] = $col . ' = ' . $v instanceof Expr ? (string)$v : '?';
+
+            if($v instanceof Expr){
+                unset($data[$col]);
+            }
         }
 
         // Build the statement
