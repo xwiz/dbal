@@ -320,7 +320,7 @@ class Db {
      * @param  Closure  $callback
      * @return mixed
      */
-    public function transaction(Closure $callback){
+    public function transaction(\Closure $callback){
         
         $this->getConnection()->beginTransaction();
         
