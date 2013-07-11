@@ -278,7 +278,7 @@ class Db {
         foreach ($data as $col => $v) {
             $cols[] = $col;
             $vals[] = $v instanceof Expr ? (string)$v : '?';
-            $update[] = $col . ' = ' . $v instanceof Expr ? (string)$v : '?';
+            $update[] = $col . ' = ' . ($v instanceof Expr ? (string)$v : '?');
 
             if($v instanceof Expr){
                 unset($data[$col]);
