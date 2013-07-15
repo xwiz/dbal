@@ -20,10 +20,14 @@ class Db {
     
     /**
      * An array to store a query profiling function
-     * @var type 
+     * @var bool 
      */
     private $_profile;
     
+    /**
+     * An array where query profiles will be stored if _profile is set to true
+     * @var array
+     */ 
     private $_queries = array();
     
     public function __construct(\PDO $connection, $profile = false) {
