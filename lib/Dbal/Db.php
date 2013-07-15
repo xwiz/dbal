@@ -339,6 +339,11 @@ class Db {
         $this->getConnection()->commit();
     }
     
+    /**
+     * Get the profile data of queries ran so far
+     * 
+     * @return array
+     */
     public function getProfile(){
         return $this->_queries;
     }
