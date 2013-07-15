@@ -191,10 +191,20 @@ class Db {
      *
      * @param string $sql
      * @param mixed $bind
-     * @return string 
+     * @return array 
      */
     public function fetchOne($sql, $bind = array()) {
         return $this->query($sql, $bind)->fetchColumn();
+    }
+    
+    /**
+     *
+     * @param string $sql
+     * @param mixed $bind
+     * @return array 
+     */
+    public function fetchAll($sql, $bind = array()) {
+        return $this->query($sql, $bind)->fetchAll();
     }
 
     /**
