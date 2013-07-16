@@ -369,7 +369,7 @@ class Select {
         $spec = '';
 
         foreach ($this->_joins as $join) {
-            $spec .= ' ' . $join['type'] . ' ' . $this->quoteIdentifierInFragment($join['name']) . ' ON ' . $this->quoteIdentifierInFragment($join['on']);
+            $spec .= ' ' . $join['type'] . ' ' . $this->quoteIdentifierInFragment($join['name']) . ' ON ' . $join['on'];
         }
 
         return $spec . "\n";
