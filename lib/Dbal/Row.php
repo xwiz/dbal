@@ -151,7 +151,7 @@ abstract class Row extends \ArrayObject {
      * @return type
      */
     public function load(){
-        $data = $this->getDb()->fetchRow('SELECT * FROM '.$this->getTable().' WHERE '.$this->idColumnName . ' = ?',$this->getId());
+        $data = $this->getDb()->fetch('SELECT * FROM '.$this->getTable().' WHERE '.$this->idColumnName . ' = ?',$this->getId());
         
         return $this->replace($data);
     }
