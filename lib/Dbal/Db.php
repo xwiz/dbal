@@ -218,8 +218,31 @@ class Db {
      * @return \PDOStatement 
      */
     public function insert($table, array $data) {
-
-        $data = $this->reduceData($table, $data);
+        return $this->doInsert($table, $data);
+    }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    public function insertIgnore($table, array $data){
+    	return $this->doInsert($table, $data, true);
+    }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @param bool $ignore Run as an insert ignore
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    protected function doInsert($table, array $data, $ignore = false){
+    	
+    	$data = $this->reduceData($table, $data);
 
         if (!count($data)) {
             throw new EmptyDataset('No data in array to insert');
@@ -234,43 +257,12 @@ class Db {
                 unset($data[$col]);
             }
         }
+        
+        $ignore = $ignore ? 'IGNORE' : '';
 
-        $sql = 'INSERT INTO ' . $table . ' (' . trim($cols, ',') . ') VALUES (' . trim($qs, ',') . ')';
+        $sql = 'INSERT ' . $ignore . ' INTO ' . $table . ' (' . trim($cols, ',') . ') VALUES (' . trim($qs, ',') . ')';
 
         return $this->query($sql, array_values($data));
-    }
-
-    /**
-     *
-     * @param string $table
-     * @param array $data
-     * @param string $where
-     * @param mixed $bind
-     * @return \PDOStatement 
-     */
-    public function update($table, array $data, $where = '0', $bind = array()) {
-
-        $data = $this->reduceData($table, $data);
-
-        if (!count($data)) {
-            throw new EmptyDataset('No data in array to update');
-        }
-
-        $str = '';
-        foreach ($data as $col => $v) {
-            $val = $v instanceof Expr ? (string)$v : '?';
-            $str .= $col . '=' . $val . ',';
-            
-            if($v instanceof Expr){
-                unset($data[$col]);
-            }
-        }
-
-        $sql = 'UPDATE ' . $table . ' SET ' . trim($str, ',') . ' WHERE ' . $where;
-
-        $bind = array_merge($data, is_array($bind) ? $bind : array($bind));
-
-        return $this->query($sql, array_values($bind));
     }
 
     /**
@@ -305,6 +297,39 @@ class Db {
 		ON DUPLICATE KEY UPDATE ' . implode(', ', $update);
 
         return $this->query($sql, array_merge(array_values($data), array_values($data)));
+    }
+    
+    /**
+     *
+     * @param string $table
+     * @param array $data
+     * @param string $where
+     * @param mixed $bind
+     * @return \PDOStatement 
+     */
+    public function update($table, array $data, $where = '0', $bind = array()) {
+
+        $data = $this->reduceData($table, $data);
+
+        if (!count($data)) {
+            throw new EmptyDataset('No data in array to update');
+        }
+
+        $str = '';
+        foreach ($data as $col => $v) {
+            $val = $v instanceof Expr ? (string)$v : '?';
+            $str .= $col . '=' . $val . ',';
+            
+            if($v instanceof Expr){
+                unset($data[$col]);
+            }
+        }
+
+        $sql = 'UPDATE ' . $table . ' SET ' . trim($str, ',') . ' WHERE ' . $where;
+
+        $bind = array_merge($data, is_array($bind) ? $bind : array($bind));
+
+        return $this->query($sql, array_values($bind));
     }
 
     /**
