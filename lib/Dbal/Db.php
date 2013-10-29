@@ -46,6 +46,14 @@ class Db {
         return $this->_connection;
     }
     
+     /**
+     * Get the PDO connection or fetch the default one if it doesn't exist
+     * @return \PDO 
+     */
+    function setConnection(\PDO $connection) {
+        $this->_connection = $connection;
+    }
+    
     /**
      * Start a new select query
      * @param string $table
