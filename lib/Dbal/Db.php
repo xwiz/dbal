@@ -384,5 +384,18 @@ class Db {
     public function getProfile(){
         return $this->_queries;
     }
+    
+    public static function make(array $config){
+    
+	    extract($config);
+	
+	    $pdo = new PDO("mysql:dbname={$database};host={$host}", $user, $password);
+	    
+	    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	
+	    $pdo->prepare("SET NAMES '{$charset}' COLLATE '{$collation}'")->execute();
+	    
+	    return new static($pdo);
+    }
 
 }
