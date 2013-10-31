@@ -391,7 +391,7 @@ class Db {
 	
 	    $pdo = new \PDO("mysql:dbname={$database};host={$host}", $user, $password);
 	    
-	    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	
 	    $pdo->prepare("SET NAMES '{$charset}' COLLATE '{$collation}'")->execute();
 	    
