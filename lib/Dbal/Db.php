@@ -389,7 +389,9 @@ class Db {
     
 	    extract($config);
 	
-	    $pdo = new \PDO("mysql:dbname={$database};host={$host}", $user, $password);
+            $db = isset($database) ? "dbname={$database}" : '';
+            
+	    $pdo = new \PDO("mysql:$db;host={$host}", $user, $password);
 	    
 	    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	
