@@ -391,7 +391,9 @@ class Db {
 	
             $db = isset($database) ? "dbname={$database}" : '';
             
-	    $pdo = new \PDO("mysql:$db;host={$host}", $user, $password);
+            isset($options) or $options = array();
+            
+	    $pdo = new \PDO("mysql:$db;host={$host}", $user, $password, $options);
 	    
 	    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	
