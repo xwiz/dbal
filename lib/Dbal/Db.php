@@ -85,7 +85,11 @@ class Db {
 
         $start = microtime(true);
         
-        $stmt->execute($bind);
+        try {
+        	$stmt->execute($bind);
+        }catch(\PDOException $e){
+        	throw new \PDOException($e->getMessage() . "\n QUERY: " . $sql . "\n BIND: " . var_export($bind,1));	
+        }
         
         $time = microtime(true) - $start;
         
