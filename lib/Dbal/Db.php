@@ -1,5 +1,7 @@
 <?php namespace Dbal;
 
+use PDO;
+
 class EmptyDataset extends \RuntimeException {
     
 }
@@ -30,7 +32,7 @@ class Db {
      */ 
     private $_queries = array();
     
-    public function __construct(\PDO $connection, $profile = false) {
+    public function __construct(PDO $connection, $profile = false) {
         
         $this->_connection = $connection;
         
@@ -50,7 +52,7 @@ class Db {
      * Get the PDO connection or fetch the default one if it doesn't exist
      * @return \PDO 
      */
-    function setConnection(\PDO $connection) {
+    function setConnection(PDO $connection) {
         $this->_connection = $connection;
     }
     
@@ -176,7 +178,7 @@ class Db {
      * @return mixed 
      */
     public function fetch($sql, $bind = array()) {
-        return $this->query($sql, $bind)->fetch(\PDO::FETCH_ASSOC);
+        return $this->query($sql, $bind)->fetch();
     }
     
     /**
@@ -186,7 +188,7 @@ class Db {
      * @return mixed 
      */
     public function fetchNumeric($sql, $bind = array()) {
-        return $this->query($sql, $bind)->fetch(\PDO::FETCH_NUM);
+        return $this->query($sql, $bind)->fetch(PDO::FETCH_NUM);
     }
     
     /**
@@ -197,7 +199,7 @@ class Db {
      */
     public function fetchObject($sql, $bind = array(),$object = null) {   
         $query = $this->query($sql, $bind);
-        $query->setFetchMode(\PDO::FETCH_INTO,is_null($object) ? new \stdClass() : $object);
+        $query->setFetchMode(PDO::FETCH_INTO,is_null($object) ? new \stdClass() : $object);
         return $query->fetch();
     }
 
@@ -401,7 +403,7 @@ class Db {
 	    
 	    $options = isset($options) ? array_replace($defaults, $options) : $defaults;
             
-	    $pdo = new \PDO("mysql:host={$host}$db", $user, $password, $options);
+	    $pdo = new PDO("mysql:host={$host}$db", $user, $password, $options);
 	
 	    $pdo->prepare("SET NAMES '{$charset}' COLLATE '{$collation}'")->execute();
 	    
