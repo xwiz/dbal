@@ -81,8 +81,6 @@ class Db {
 
         $stmt = $this->getConnection()->prepare($sql);
         
-        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-
         $start = microtime(true);
         
         try {
@@ -395,11 +393,15 @@ class Db {
 	
             $db = isset($database) ? ";dbname={$database}" : '';
             
-            isset($options) or $options = array();
+            $defaults = array(
+	        PDO::ATTR_EMULATE_PREPARES 	=> false,
+	        PDO::ATTR_ERRMODE 		=> PDO::ERRMODE_EXCEPTION,
+	        PDO::ATTR_DEFAULT_FETCH_MODE 	=> PDO::FETCH_ASSOC,
+	    );
+	    
+	    $options = isset($options) ? array_replace($defaults, $options) : $defaults;
             
 	    $pdo = new \PDO("mysql:host={$host}$db", $user, $password, $options);
-	    
-	    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	
 	    $pdo->prepare("SET NAMES '{$charset}' COLLATE '{$collation}'")->execute();
 	    
