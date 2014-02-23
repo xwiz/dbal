@@ -26,6 +26,12 @@ class Db {
      */
     private $_profile;
     
+    const INSERT = 'INSERT';
+    
+    const INSERT_IGNORE = 'INSERT IGNORE';
+    
+    const INSERT_REPLACE = 'REPLACE';
+    
     /**
      * An array where query profiles will be stored if _profile is set to true
      * @var array
@@ -111,16 +117,44 @@ class Db {
                 $columnNames = array_merge($columnNames, $this->getColumnNames($t));
             }
             return $columnNames;
-        } else {
-            if (!array_key_exists($table, $this->_tableCache)) {
-                $cols = array();
-                foreach ($this->query('SHOW COLUMNS FROM ' . $table) as $col) {
-                    isset($col['Field']) and $cols[] = $col['Field'];
-                }
-                $this->_tableCache[$table] = $cols;
+        } 
+        
+        return array_keys($this->getColumnInfo($table));
+    }
+    
+    /**
+     * Queries the database to find the columns in the given table(s)
+     * 
+     * @param mixed $table A string table name, or an array of string tablenames
+     * @return array  An array containing the column names from the given table(s)
+     */
+    public function getColumnInfo($table) {
+        if (!array_key_exists($table, $this->_tableCache)) {
+            $cols = array();
+            foreach ($this->query('SHOW COLUMNS FROM ' . $table) as $col) {
+                isset($col['Field']) and $cols[$col['Field']] = $col;
             }
-            return $this->_tableCache[$table];
+            $this->_tableCache[$table] = $cols;
         }
+        return $this->_tableCache[$table];
+    }
+    
+    public function showTables($database = null)
+    {
+        $from = $database ? ' FROM ' . $database : '';
+        
+        return array_map(function($obj){
+            return $obj[0];
+        }, $this->query('SHOW TABLES' . $from)->fetchAll(PDO::FETCH_NUM));
+    }
+    
+    public function showPrimaryKey($table)
+    {                        
+        $fields = array_filter($this->getColumnInfo($table), function($item){
+            return $item['Key'] === 'PRI';
+        });
+        
+        return array_keys($fields);
     }
 
     /**
@@ -241,7 +275,18 @@ class Db {
      * @throws DbException
      */
     public function insertIgnore($table, array $data){
-    	return $this->doInsert($table, $data, true);
+    	return $this->doInsert($table, $data, self::INSERT_IGNORE);
+    }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    public function replace($table, array $data){
+    	return $this->doInsert($table, $data, self::INSERT_REPLACE);
     }
     
     /**
@@ -252,29 +297,101 @@ class Db {
      * @return \PDOStatement
      * @throws DbException
      */
-    protected function doInsert($table, array $data, $ignore = false){
+    protected function doInsert($table, array $data, $type = self::INSERT){
     	
     	$data = $this->reduceData($table, $data);
 
         if (!count($data)) {
             throw new EmptyDataset('No data in array to insert');
         }
-
-        $cols = '';
+        
         $qs = '';
         foreach ($data as $col => $v) {
-            $cols .= $col . ',';
             $qs .= ($v instanceof Expr ? (string)$v : '?') . ',';
             if($v instanceof Expr){
                 unset($data[$col]);
             }
         }
         
-        $ignore = $ignore ? 'IGNORE' : '';
-
-        $sql = 'INSERT ' . $ignore . ' INTO ' . $table . ' (' . trim($cols, ',') . ') VALUES (' . trim($qs, ',') . ')';
+        $cols = array_keys($data);
+        
+        $sql = $type . ' INTO ' . $table . ' (' . implode(',', $cols) . ') VALUES (' . trim($qs, ',') . ')';
 
         return $this->query($sql, array_values($data));
+    }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @param bool $ignore Run as an insert ignore
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    protected function doMultiInsert($table, $data, $type = self::INSERT){
+    	
+    	if (!count($data)) {
+            throw new EmptyDataset('No data in array to insert');
+        }
+        
+        $cols = null;
+        $qs = '';
+        $bind = array();
+        
+        foreach($data as $row)
+        {   $qs .= '(';
+            foreach ($row as $col => $v) {
+                $qs .= ($v instanceof Expr ? (string)$v : '?') . ',';
+                if(!$v instanceof Expr){
+                    $bind[] = $row[$col];
+                }
+                else {
+                    unset($data[$col]);
+                }
+            }
+            $cols or $cols = array_keys($row);
+            $qs = trim($qs, ',') . '),';
+        }
+        
+        $sql = $type . ' INTO ' . $table . ' (' . implode(',', $cols) . ') VALUES ' . trim($qs, ',') . '';
+
+        return $this->query($sql, $bind);
+    }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @param bool $ignore Run as an insert ignore
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    public function multiInsert($table, $data){
+        return $this->doMultiInsert($table, $data);
+    }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @param bool $ignore Run as an insert ignore
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    public function multiInsertIgnore($table, $data){
+        return $this->doMultiInsert($table, $data, self::INSERT_IGNORE);
+    }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @param bool $ignore Run as an insert ignore
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    public function multiReplace($table, $data){
+        return $this->doMultiInsert($table, $data, self::INSERT_REPLACE);
     }
 
     /**
@@ -404,8 +521,8 @@ class Db {
             
 	    $pdo = new PDO("mysql:host={$host}$db", $user, $password, $options);
 	
-	    $pdo->prepare("SET NAMES '{$charset}' COLLATE '{$collation}'")->execute();
-	    
+        !empty($charset) and $pdo->prepare("SET NAMES '{$charset}'" . (empty($collation) ? '' : " COLLATE '{$collation}'"))->execute();
+        	    
 	    return new static($pdo);
     }
 
