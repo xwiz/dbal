@@ -346,7 +346,7 @@ class Db {
                     $bind[] = $row[$col];
                 }
                 else {
-                    unset($data[$col]);
+                    unset($row[$col]);
                 }
             }
             $cols or $cols = array_keys($row);
