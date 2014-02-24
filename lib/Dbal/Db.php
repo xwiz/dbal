@@ -330,7 +330,9 @@ class Db {
      */
     protected function doMultiInsert($table, $data, $type = self::INSERT){
     	
-    	if (!count($data)) {
+    	$count = $data instanceof \PDOStatement ? $data->rowCount() : count($data);
+    	
+    	if (!$count) {
             throw new EmptyDataset('No data in array to insert');
         }
         
