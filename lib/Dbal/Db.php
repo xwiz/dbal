@@ -429,14 +429,14 @@ class Db {
             $qs = trim($qs, ',') . '),';
         }
         
-        $sql = $type . ' INTO ' . $table . ' (' . implode(',', $cols) . ') VALUES ' . trim($qs, ',') . '';
-
-	$cols = implode(', ', $cols);
+	$colsValues = array_map(function($col){
+		return $col . ' = VALUES(' . $col . ')';
+	}, $cols);
 
 	// Build the statement
         $sql = 'INSERT INTO ' . $table . ' 
-		(' . $cols . ') VALUES ' . trim($qs, ',') . '	
-		ON DUPLICATE KEY UPDATE VALUES(' . $cols . ')';
+		(' . implode(', ', $cols) . ') VALUES ' . trim($qs, ',') . '	
+		ON DUPLICATE KEY UPDATE ' . implode(', ', $colsValues);
 
         return $this->query($sql, $bind);
     }
