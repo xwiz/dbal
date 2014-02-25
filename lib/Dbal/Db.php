@@ -395,6 +395,51 @@ class Db {
     public function multiReplace($table, $data){
         return $this->doMultiInsert($table, $data, self::INSERT_REPLACE);
     }
+    
+    /**
+     * 
+     * @param string $table
+     * @param array $data
+     * @return \PDOStatement
+     * @throws DbException
+     */
+    public function multiInsertOnDuplicateKeyUpdate($table, array $data) {
+        $count = $data instanceof \PDOStatement ? $data->rowCount() : count($data);
+    	
+    	if (!$count) {
+            throw new EmptyDataset('No data in array to insert');
+        }
+        
+        $cols = null;
+        $qs = '';
+        $bind = array();
+        
+        foreach($data as $row)
+        {   $qs .= '(';
+            foreach ($row as $col => $v) {
+                $qs .= ($v instanceof Expr ? (string)$v : '?') . ',';
+                if(!$v instanceof Expr){
+                    $bind[] = $row[$col];
+                }
+                else {
+                    unset($row[$col]);
+                }
+            }
+            $cols or $cols = array_keys($row);
+            $qs = trim($qs, ',') . '),';
+        }
+        
+        $sql = $type . ' INTO ' . $table . ' (' . implode(',', $cols) . ') VALUES ' . trim($qs, ',') . '';
+
+	$cols = implode(', ', $cols);
+
+	// Build the statement
+        $sql = 'INSERT INTO ' . $table . ' 
+		(' . $cols . ') VALUES ' . trim($qs, ',') . '	
+		ON DUPLICATE KEY UPDATE VALUES(' . $cols . ')';
+
+        return $this->query($sql, $bind);
+    }
 
     /**
      * 
