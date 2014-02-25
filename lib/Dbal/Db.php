@@ -403,7 +403,7 @@ class Db {
      * @return \PDOStatement
      * @throws DbException
      */
-    public function multiInsertOnDuplicateKeyUpdate($table, array $data) {
+    public function multiInsertOnDuplicateKeyUpdate($table, $data) {
         $count = $data instanceof \PDOStatement ? $data->rowCount() : count($data);
     	
     	if (!$count) {
