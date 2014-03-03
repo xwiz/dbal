@@ -42,8 +42,13 @@ class Db {
         
         $this->_connection = $connection;
         
-        $this->_profile = (bool) $profile;
+        $this->profile($profile);
         
+    }
+    
+    public function profile($profile = true)
+    {
+    	$this->_profile = (bool) $profile;
     }
 
     /**
