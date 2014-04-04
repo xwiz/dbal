@@ -310,6 +310,8 @@ class Db {
             throw new EmptyDataset('No data in array to insert');
         }
         
+        $cols = array_keys($data);
+        
         $qs = '';
         foreach ($data as $col => $v) {
             $qs .= ($v instanceof Expr ? (string)$v : '?') . ',';
@@ -317,9 +319,7 @@ class Db {
                 unset($data[$col]);
             }
         }
-        
-        $cols = array_keys($data);
-        
+
         $sql = $type . ' INTO ' . $table . ' (' . implode(',', $cols) . ') VALUES (' . trim($qs, ',') . ')';
 
         return $this->query($sql, array_values($data));
@@ -347,6 +347,7 @@ class Db {
         
         foreach($data as $row)
         {   $qs .= '(';
+       	    $cols or $cols = array_keys($row);
             foreach ($row as $col => $v) {
                 $qs .= ($v instanceof Expr ? (string)$v : '?') . ',';
                 if(!$v instanceof Expr){
@@ -356,7 +357,6 @@ class Db {
                     unset($row[$col]);
                 }
             }
-            $cols or $cols = array_keys($row);
             $qs = trim($qs, ',') . '),';
         }
         
