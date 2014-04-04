@@ -544,9 +544,11 @@ class Db {
         
         $this->getConnection()->beginTransaction();
         
-        $callback($this);
+        $result = $callback($this);
         
         $this->getConnection()->commit();
+        
+        return $result;
     }
     
     /**
